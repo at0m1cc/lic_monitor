@@ -4,29 +4,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.EntityBuilder;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 
 public class LicFile {
     private File fileSource;
     private File fileParsed;
     private List<Programm> licList;
 
-    public LicFile(String path,String fileSourceName) throws IOException{
-        fileSource = new File(path,fileSourceName);
+    public LicFile(String fileSourceName) throws IOException{
+        fileSource = new File(fileSourceName);
         fileParsed = new File("parsed_"+fileSourceName);
         fileParsed.createNewFile();
         licList = new ArrayList<>();
@@ -76,17 +64,5 @@ public class LicFile {
 
     public List<Programm> getLicList(){
         return licList;
-    }
-
-    public void sendToAPI() throws IOException{
-        CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost post = new HttpPost("http://localhost");
-        List<NameValuePair> nameValue = new ArrayList<>();
-        int count = 0;
-        for (Programm i : getLicList()){
-            nameValue.add(new BasicNameValuePair(i.getNameProgramm(),  i.getUsersProgramm().toString()));
-        }
-        post.setEntity(new UrlEncodedFormEntity(nameValue));
-        client.execute(post);
     }
 }
