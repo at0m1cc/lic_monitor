@@ -13,8 +13,8 @@ public class LicFile {
     private File fileParsed;
     private List<Programm> licList;
 
-    public LicFile(String fileSourceName) throws IOException{
-        fileSource = new File(fileSourceName);
+    public LicFile(String pathToFile,String fileSourceName) throws IOException{
+        fileSource = new File(pathToFile,fileSourceName);
         fileParsed = new File("parsed_"+fileSourceName);
         fileParsed.createNewFile();
         licList = new ArrayList<>();

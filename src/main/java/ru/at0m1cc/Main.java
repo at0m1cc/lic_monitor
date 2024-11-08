@@ -27,8 +27,8 @@ public class Main {
                     case "showLic" -> {
                         Runtime.getRuntime().exec(queryNanoCAD);
                         Runtime.getRuntime().exec(queryCSoft);
-                        LicFile nanoCAD = new LicFile("NanoCAD.txt");
-                        LicFile cSoft = new LicFile("CSoft.txt");
+                        LicFile nanoCAD = new LicFile(Settings.getPathNanoCAD() ,"NanoCAD.txt");
+                        LicFile cSoft = new LicFile(Settings.getPathCSoft(),"CSoft.txt");
                         nanoCAD.parse();
                         cSoft.parse();
                         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File("parsed_NanoCAD.txt")));
