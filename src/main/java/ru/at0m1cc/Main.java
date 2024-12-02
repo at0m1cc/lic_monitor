@@ -17,37 +17,46 @@ public class Main {
         String queryNanoCAD = "cmd /k cd \"" + Settings.getPathNanoCAD() + "\" & lmutil lmstat -a -c 27001@localhost > NanoCAD.txt";
         String queryCSoft = "cmd /k cd \"" + Settings.getPathCSoft() + "\" & lmutil lmstat -a -c 27000@localhost > CSoft.txt";
         try {
-            ServerSocket serverSocket = new ServerSocket(Settings.getPort()); // Создаём сервер сокет
-            while (true) {
-                Socket socket = serverSocket.accept(); // Ждём подключения к нашему сокету
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // Получение информации с клиента
-                String request = reader.readLine();//Передаём всю информацию с клиента
-                //Проверка команд
-                switch (request) {
-                    case "showLic" -> {
-                        Runtime.getRuntime().exec(queryNanoCAD);
-                        Runtime.getRuntime().exec(queryCSoft);
-                        LicFile nanoCAD = new LicFile(Settings.getPathNanoCAD() ,"NanoCAD.txt");
-                        LicFile cSoft = new LicFile(Settings.getPathCSoft(),"CSoft.txt");
-                        nanoCAD.parse();
-                        cSoft.parse();
-                        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File("parsed_NanoCAD.txt")));
-                        BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
-                        byte[] byteArr = new byte[13240];
-                        int byteR;
-                        for(;(byteR = bis.read(byteArr)) != -1;){
-                            bos.write(byteArr, 0, byteR);
-                            bos.flush();
+            try (ServerSocket serverSocket = new ServerSocket(Settings.getPort())) {
+                while (true) {
+                    Socket socket = serverSocket.accept(); // Ждём подключения к нашему сокету
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // Получение информации с клиента
+                    String request = reader.readLine();//Передаём всю информацию с клиента
+                    //Проверка команд
+                    switch (request) {
+                        case "showLic" -> {
+                            Runtime.getRuntime().exec(queryNanoCAD);
+                            Runtime.getRuntime().exec(queryCSoft);
+                            LicFile nanoCAD = new LicFile(Settings.getPathNanoCAD() ,"NanoCAD.txt");
+                            LicFile cSoft = new LicFile(Settings.getPathCSoft(),"CSoft.txt");
+                            nanoCAD.parse();
+                            cSoft.parse();
+                            BufferedInputStream bisN = new BufferedInputStream(new FileInputStream(new File("parsed_NanoCAD.txt")));
+                            BufferedInputStream bisC = new BufferedInputStream(new FileInputStream(new File("parsed_CSoft.txt")));
+                            BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+                            sendTo(bisN, bos);
+                            sendTo(bisC, bos);
                         }
-                        bis.close();
-                        bos.close();
+                        case "reload" -> {
+                            Settings.load("settings.ini");
+                        }
                     }
+                    reader.close();
                 }
-                reader.close();
             }
             
         } catch (IOException e) {
             throw new RuntimeException(e); //Если что-либо пошло не по плану
         }
+    }
+    public static void sendTo(BufferedInputStream bis, BufferedOutputStream bos) throws IOException{
+        byte[] byteArr = new byte[13240];
+        int byteR;
+        for(;(byteR = bis.read(byteArr)) != -1;){
+            bos.write(byteArr, 0, byteR);
+            bos.flush();
+        }
+        bis.close();
+        bos.close();
     }
 }
